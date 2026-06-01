@@ -14,6 +14,7 @@ import ProjectDetail from './pages/ProjectDetail';
 import Dashboard from './pages/Dashboard';
 import CreateProject from './pages/CreateProject';
 import AdminPanel from './pages/AdminPanel';
+import TestimonyForm from './pages/TestimonyForm';
 import {AuthProvider, useAuth} from './context/AuthContext'
 
 function AppContent() {
@@ -38,12 +39,13 @@ function AppContent() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/directory" element={<Directory />} />
-          <Route path="/editor" element={<Editor />} />
-          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/editor/:projectId" element={<Editor />} />
+          <Route path="/dashboard/:projectId" element={<Dashboard />} />
           <Route path="/login" element={<Login />} />
           <Route path="/project/:id" element={<ProjectDetail />} />
           <Route path="/create-project" element={<CreateProject />} />
           <Route path="/admin" element={<AdminPanel />} />
+          <Route path="/project/:projectId/testimonies" element={<TestimonyForm />} />
         </Routes>
       </main>
       {!isLoginPage && <Footer />}

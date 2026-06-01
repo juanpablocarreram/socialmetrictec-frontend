@@ -1,44 +1,23 @@
 import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { ArrowRight, School, HeartPulse, Leaf, Handshake, Landmark, Cpu, CheckCircle2, Users, Globe, Target, BarChart3 } from 'lucide-react';
+import { listProjects, formatArea, ProjectSummary } from '@/src/services/projectService';
 
 export default function Home() {
+  const [featuredProjects, setFeaturedProjects] = useState<ProjectSummary[]>([]);
+
+  useEffect(() => {
+    listProjects()
+      .then((all) => setFeaturedProjects(all.slice(0, 4)))
+      .catch(console.error);
+  }, []);
+
   const metrics = [
     { label: 'Proyectos Activos', value: '450+', icon: Target },
     { label: 'Voluntarios Registrados', value: '12k', icon: Users },
     { label: 'Estados Alcanzados', value: '32', icon: Globe },
     { label: 'Impacto Directo', value: '8.5m', icon: BarChart3 },
-  ];
-
-  const projects = [
-    {
-      title: 'Brigadas Médicas Rurales 2024',
-      category: 'Salud Comunitaria',
-      description: 'Implementación de sistemas de telemedicina y atención directa en comunidades con difícil acceso a servicios básicos de salud.',
-      image: 'https://picsum.photos/seed/health/800/600',
-      size: 'large'
-    },
-    {
-      title: 'Inclusión Tech para Jóvenes',
-      category: 'Educación Digital',
-      description: 'Capacitación en habilidades STEM para reducir la brecha digital en zonas suburbanas.',
-      image: 'https://picsum.photos/seed/tech/600/400',
-      size: 'small'
-    },
-    {
-      title: 'Huertos Urbanos Sostenibles',
-      category: 'Sustentabilidad',
-      description: 'Fomento de la soberanía alimentaria mediante el uso de espacios urbanos residuales.',
-      image: 'https://picsum.photos/seed/nature/600/400',
-      size: 'small'
-    },
-    {
-      title: 'Red de Micro-Financiamiento Solidario',
-      category: 'Emprendimiento Social',
-      description: 'Acompañamiento y capital semilla para proyectos liderados por mujeres en el sector artesanal.',
-      image: 'https://picsum.photos/seed/weaving/800/600',
-      size: 'large'
-    }
   ];
 
   const impactAreas = [
@@ -133,50 +112,57 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
-            {projects.map((project, idx) => (
-              <motion.div 
-                key={idx}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.1 }}
-                viewport={{ once: true }}
-                className={cn(
-                  "group rounded-2xl overflow-hidden tonal-card",
-                  project.size === 'large' ? "md:col-span-8" : "md:col-span-4"
-                )}
-              >
-                <div className={cn(
-                  "flex flex-col h-full",
-                  project.size === 'large' ? "md:flex-row" : ""
-                )}>
-                  <div className={cn(
-                    "overflow-hidden",
-                    project.size === 'large' ? "md:w-1/2 h-64 md:h-full" : "h-64"
-                  )}>
-                    <img 
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
-                      src={project.image} 
-                      alt={project.title}
-                      referrerPolicy="no-referrer"
-                    />
+            {featuredProjects.map((project, idx) => {
+              const isLarge = idx % 3 === 0;
+              return (
+                <motion.div
+                  key={project.project_id}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.1 }}
+                  viewport={{ once: true }}
+                  className={cn(
+                    'group rounded-2xl overflow-hidden tonal-card',
+                    isLarge ? 'md:col-span-8' : 'md:col-span-4',
+                  )}
+                >
+                  <div className={cn('flex flex-col h-full', isLarge ? 'md:flex-row' : '')}>
+                    <div className={cn('overflow-hidden', isLarge ? 'md:w-1/2 h-64 md:h-full' : 'h-64')}>
+                      <img
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        src={project.cover_image_url || 'https://picsum.photos/seed/project/800/600'}
+                        alt={project.project_name}
+                        referrerPolicy="no-referrer"
+                      />
+                    </div>
+                    <div className={cn('p-8 md:p-10 flex flex-col justify-center space-y-6', isLarge ? 'md:w-1/2' : '')}>
+                      <span className="text-tertiary-container font-bold text-xs uppercase tracking-widest">
+                        {formatArea(project.impact_area)}
+                      </span>
+                      <h3 className="text-2xl font-bold text-primary leading-tight">{project.project_name}</h3>
+                      <p className="text-on-surface-variant text-sm leading-relaxed">
+                        {project.description ?? 'Sin descripción.'}
+                      </p>
+                      <Link
+                        to={`/project/${project.project_id}`}
+                        className="self-start text-primary border-b-2 border-primary pb-1 font-bold hover:text-primary-container hover:border-primary-container transition-colors"
+                      >
+                        Ver Detalles
+                      </Link>
+                    </div>
                   </div>
-                  <div className={cn(
-                    "p-8 md:p-10 flex flex-col justify-center space-y-6",
-                    project.size === 'large' ? "md:w-1/2" : ""
-                  )}>
-                    <span className="text-tertiary-container font-bold text-xs uppercase tracking-widest">{project.category}</span>
-                    <h3 className="text-2xl font-bold text-primary leading-tight">{project.title}</h3>
-                    <p className="text-on-surface-variant text-sm leading-relaxed">{project.description}</p>
-                    <Link 
-                      to="/project/1"
-                      className="self-start text-primary border-b-2 border-primary pb-1 font-bold hover:text-primary-container hover:border-primary-container transition-colors"
-                    >
-                      Ver Detalles
-                    </Link>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
+                </motion.div>
+              );
+            })}
+            {featuredProjects.length === 0 && (
+              <div className="md:col-span-12 py-16 text-center text-on-surface-variant">
+                Aún no hay proyectos publicados.{' '}
+                <Link to="/create-project" className="text-primary font-bold hover:underline">
+                  Crea el primero
+                </Link>
+                .
+              </div>
+            )}
           </div>
         </div>
       </section>
